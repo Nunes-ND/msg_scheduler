@@ -1,0 +1,29 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Debug Vitest: Run in Current Test File",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceFolder}/node_modules/.bin/vitest",
+			"args": [
+				"watch",
+				"${file}",
+				"--test-timeout=0",
+				"--hook-timeout=0",
+				"--pool",
+				"threads",
+				"--poolOptions.threads.singleThread"
+			],
+			"cwd": "${workspaceFolder}",
+			"console": "integratedTerminal",
+			"internalConsoleOptions": "neverOpen",
+			"skipFiles": [
+				"<node_internals>/**",
+				"${workspaceFolder}/node_modules/**"
+			],
+			"smartStep": true,
+			"outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"]
+		}
+	]
+}

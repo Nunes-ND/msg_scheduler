@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"target": "ES2023",
+		"module": "commonjs",
+		"outDir": "./dist",
+		"baseUrl": "./",
+		"allowSyntheticDefaultImports": true,
+		"resolveJsonModule": true,
+		"forceConsistentCasingInFileNames": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"esModuleInterop": true,
+		"paths": {
+			"@/*": ["src/*"]
+		}
+	},
+	"include": ["src/**/*", "tests/**/*", "vitest.config.ts"],
+	"exclude": ["node_modules", "dist", "build"]
+}
