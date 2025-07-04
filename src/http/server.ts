@@ -4,6 +4,7 @@ import fastify, {
 	type FastifyReply,
 	type FastifyRequest,
 } from "fastify";
+import { schedulerRoute } from "../scheduler";
 
 export const server: FastifyInstance = fastify({
 	logger:
@@ -24,6 +25,8 @@ export const server: FastifyInstance = fastify({
 server.get("/", (request: FastifyRequest, reply: FastifyReply) => {
 	reply.send({ status: "ok" });
 });
+
+server.register(schedulerRoute);
 
 server.setErrorHandler(
 	(error: FastifyError, request: FastifyRequest, reply: FastifyReply) => {
