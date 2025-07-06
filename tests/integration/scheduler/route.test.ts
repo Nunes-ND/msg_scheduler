@@ -278,4 +278,66 @@ describe("Scheduler", () => {
 			expect(response.statusCode).toBe(400);
 		});
 	});
+
+	describe("Scheduler DELETE /schedules", () => {
+		it("should delete a scheduled message and verify it is gone", async () => {
+			const schedulingDate = new Date();
+			schedulingDate.setDate(schedulingDate.getDate() + 1);
+			const messageResponse = await server.inject({
+				method: "POST",
+				url: "/schedules",
+				body: {
+					messageType: "EMAIL",
+					message: "New email scheduled email",
+					recipient: "email@example.com",
+					schedulingDate: schedulingDate.toISOString(),
+				},
+			});
+
+			const messageId = messageResponse.json().id;
+
+			const deleteResponse = await server.inject({
+				method: "DELETE",
+				url: `/schedules/${messageId}`,
+			});
+
+			expect(deleteResponse.statusCode).toBe(204);
+
+			const getResponse = await server.inject({
+				method: "GET",
+				url: `/schedules/${messageId}`,
+			});
+
+			expect(getResponse.statusCode).toBe(404);
+		});
+
+		it("should return a 404 error if the message to be deleted does not exist", async () => {
+			const inexistentId = randomUUID();
+
+			const response = await server.inject({
+				method: "DELETE",
+				url: `/schedules/${inexistentId}`,
+			});
+
+			expect(response.statusCode).toBe(404);
+			expect(response.json()).toHaveProperty("message", "Message not found");
+		});
+
+		it("should return a 400 error if the message ID is not a valid UUID format", async () => {
+			const invalidId = "not-a-valid-uuid";
+
+			const response = await server.inject({
+				method: "DELETE",
+				url: `/schedules/${invalidId}`,
+			});
+
+			expect(response.statusCode).toBe(400);
+			expect(response.json()).toEqual(
+				expect.objectContaining({
+					error: "Bad Request",
+					message: "Dados de entrada inválidos.",
+				}),
+			);
+		});
+	});
 });
