@@ -9,3 +9,9 @@ export class InvalidSchedulingDateError extends Error {
 		super("Cannot schedule a message for a past date.");
 	}
 }
+
+export class MessageNotFoundError extends Error {
+	constructor() {
+		super("Message not found");
+	}
+}

@@ -1,6 +1,10 @@
 import type { Pool } from "pg";
 import { dbConnection } from "@/providers/database/connection";
-import { DuplicateScheduleError, InvalidSchedulingDateError } from "./errors";
+import {
+	DuplicateScheduleError,
+	InvalidSchedulingDateError,
+	MessageNotFoundError,
+} from "./errors";
 
 export type MessagePayload = {
 	messageType: string;
@@ -10,6 +14,7 @@ export type MessagePayload = {
 };
 
 export type ScheduledMessage = MessagePayload & {
+	id: string;
 	scheduled: boolean;
 };
 
@@ -66,6 +71,25 @@ class SchedulerService {
 			};
 
 			return scheduledMessage;
+		} finally {
+			client.release();
+		}
+	}
+
+	async showStatus(id: string): Promise<ScheduledMessage> {
+		const client = await this.dbConnection.connect();
+
+		try {
+			const result = await client.query(
+				`SELECT * FROM messages WHERE id = $1 LIMIT 1`,
+				[id],
+			);
+
+			if (!result.rows[0]) {
+				throw new MessageNotFoundError();
+			}
+
+			return result.rows[0];
 		} finally {
 			client.release();
 		}

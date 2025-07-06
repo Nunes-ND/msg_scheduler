@@ -1,5 +1,9 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { DuplicateScheduleError, InvalidSchedulingDateError } from "./errors";
+import {
+	DuplicateScheduleError,
+	InvalidSchedulingDateError,
+	MessageNotFoundError,
+} from "./errors";
 import { type MessagePayload, schedulerService } from "./service";
 
 export function schedulerRoute(app: FastifyInstance) {
@@ -45,6 +49,43 @@ export function schedulerRoute(app: FastifyInstance) {
 				}
 				if (error instanceof DuplicateScheduleError) {
 					return reply.status(409).send({ message: error.message });
+				}
+				throw error;
+			}
+		},
+	);
+
+	app.get(
+		"/schedules/:id",
+		{
+			schema: {
+				params: {
+					type: "object",
+					properties: {
+						id: {
+							type: "string",
+							format: "uuid",
+						},
+					},
+					required: ["id"],
+					additionalProperties: false,
+				},
+			},
+		},
+		async (
+			request: FastifyRequest<{ Params: { id: string } }>,
+			reply: FastifyReply,
+		) => {
+			try {
+				const { id } = request.params;
+				const schedule = await schedulerService.showStatus(id);
+				reply.status(200).send({
+					id: schedule.id,
+					scheduled: schedule.scheduled,
+				});
+			} catch (error) {
+				if (error instanceof MessageNotFoundError) {
+					return reply.status(404).send({ message: error.message });
 				}
 				throw error;
 			}
