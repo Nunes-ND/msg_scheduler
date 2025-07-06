@@ -1,0 +1,17 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"outDir": "build",
+		"sourceMap": true,
+		"incremental": true
+	},
+	"include": ["src/**/*"],
+	"exclude": [
+		"dist",
+		"build",
+		"vitest.config.ts",
+		"tests/**/*",
+		"**/*.spec.ts",
+		"**/*.test.ts"
+	]
+}
