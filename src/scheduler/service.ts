@@ -94,6 +94,28 @@ class SchedulerService {
 			client.release();
 		}
 	}
+
+	async changeStatus(
+		id: string,
+		scheduled: boolean,
+	): Promise<ScheduledMessage> {
+		const client = await this.dbConnection.connect();
+
+		try {
+			const result = await client.query(
+				`UPDATE messages SET scheduled = $1 WHERE id = $2 RETURNING *`,
+				[scheduled, id],
+			);
+
+			if (!result.rows[0]) {
+				throw new MessageNotFoundError();
+			}
+
+			return result.rows[0];
+		} finally {
+			client.release();
+		}
+	}
 }
 
 export const schedulerService = SchedulerService.getInstance();

@@ -91,4 +91,55 @@ export function schedulerRoute(app: FastifyInstance) {
 			}
 		},
 	);
+
+	app.put(
+		"/schedules/:id",
+		{
+			schema: {
+				params: {
+					type: "object",
+					properties: {
+						id: {
+							type: "string",
+							format: "uuid",
+						},
+					},
+					required: ["id"],
+					additionalProperties: false,
+				},
+				body: {
+					type: "object",
+					properties: {
+						scheduled: {
+							type: "boolean",
+						},
+					},
+					required: ["scheduled"],
+					additionalProperties: false,
+				},
+			},
+		},
+		async (
+			request: FastifyRequest<{
+				Params: { id: string };
+				Body: { scheduled: boolean };
+			}>,
+			reply: FastifyReply,
+		) => {
+			try {
+				const { id } = request.params;
+				const { scheduled } = request.body;
+				const schedule = await schedulerService.changeStatus(id, scheduled);
+				reply.status(200).send({
+					id: schedule.id,
+					scheduled: schedule.scheduled,
+				});
+			} catch (error) {
+				if (error instanceof MessageNotFoundError) {
+					return reply.status(404).send({ message: error.message });
+				}
+				throw error;
+			}
+		},
+	);
 }
