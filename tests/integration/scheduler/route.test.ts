@@ -190,4 +190,92 @@ describe("Scheduler", () => {
 			);
 		});
 	});
+
+	describe("Scheduler PUT /schedules", () => {
+		it("should update the scheduled message status", async () => {
+			const schedulingDate = new Date();
+			schedulingDate.setDate(schedulingDate.getDate() + 1);
+			const messageResponse = await server.inject({
+				method: "POST",
+				url: "/schedules",
+				body: {
+					messageType: "EMAIL",
+					message: "New email scheduled email",
+					recipient: "email@example.com",
+					schedulingDate: schedulingDate.toISOString(),
+				},
+			});
+
+			const response = await server.inject({
+				method: "PUT",
+				url: `/schedules/${messageResponse.json().id}`,
+				body: {
+					scheduled: false,
+				},
+			});
+
+			expect(response.statusCode).toBe(200);
+			expect(response.json()).toHaveProperty("scheduled", false);
+		});
+
+		it("should not update the scheduled message status if it does not exist", async () => {
+			const inexistentId = randomUUID();
+
+			const response = await server.inject({
+				method: "PUT",
+				url: `/schedules/${inexistentId}`,
+				body: {
+					scheduled: false,
+				},
+			});
+
+			expect(response.statusCode).toBe(404);
+			expect(response.json()).toHaveProperty("message", "Message not found");
+		});
+
+		it("should return a 400 error if the message ID is not a valid UUID format", async () => {
+			const invalidId = "not-a-valid-uuid";
+
+			const response = await server.inject({
+				method: "PUT",
+				url: `/schedules/${invalidId}`,
+				body: {
+					scheduled: false,
+				},
+			});
+
+			expect(response.statusCode).toBe(400);
+			expect(response.json()).toEqual(
+				expect.objectContaining({
+					error: "Bad Request",
+					message: "Dados de entrada inválidos.",
+				}),
+			);
+		});
+
+		it("should return a 400 error if the body is invalid", async () => {
+			const schedulingDate = new Date();
+			schedulingDate.setDate(schedulingDate.getDate() + 1);
+			const messageResponse = await server.inject({
+				method: "POST",
+				url: "/schedules",
+				body: {
+					messageType: "EMAIL",
+					message: "New email scheduled email",
+					recipient: "email@example.com",
+					schedulingDate: schedulingDate.toISOString(),
+				},
+			});
+
+			const response = await server.inject({
+				method: "PUT",
+				url: `/schedules/${messageResponse.json().id}`,
+				body: {
+					scheduled: "not-a-boolean",
+				},
+			});
+
+			expect(response.statusCode).toBe(400);
+		});
+	});
 });
