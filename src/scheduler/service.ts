@@ -116,6 +116,22 @@ class SchedulerService {
 			client.release();
 		}
 	}
+
+	async delete(id: string): Promise<void> {
+		const client = await this.dbConnection.connect();
+
+		try {
+			const result = await client.query(`DELETE FROM messages WHERE id = $1`, [
+				id,
+			]);
+
+			if (result.rowCount === 0) {
+				throw new MessageNotFoundError();
+			}
+		} finally {
+			client.release();
+		}
+	}
 }
 
 export const schedulerService = SchedulerService.getInstance();

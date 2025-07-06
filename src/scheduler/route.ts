@@ -142,4 +142,39 @@ export function schedulerRoute(app: FastifyInstance) {
 			}
 		},
 	);
+
+	app.delete(
+		"/schedules/:id",
+		{
+			schema: {
+				params: {
+					type: "object",
+					properties: {
+						id: {
+							type: "string",
+							format: "uuid",
+						},
+					},
+					required: ["id"],
+					additionalProperties: false,
+				},
+			},
+		},
+		async (
+			request: FastifyRequest<{ Params: { id: string } }>,
+			reply: FastifyReply,
+		) => {
+			try {
+				const { id } = request.params;
+
+				await schedulerService.delete(id);
+				reply.status(204).send();
+			} catch (error) {
+				if (error instanceof MessageNotFoundError) {
+					return reply.status(404).send({ message: error.message });
+				}
+				throw error;
+			}
+		},
+	);
 }
