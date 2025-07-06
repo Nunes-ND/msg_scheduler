@@ -1,15 +1,10 @@
-import { afterAll, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { server } from "@/http/server";
 import { dbConnection } from "@/providers/database/connection";
 
 describe("Scheduler POST /schedules", () => {
 	beforeEach(async () => {
 		await dbConnection.query('DELETE FROM "messages"');
-	});
-
-	afterAll(async () => {
-		await dbConnection.query('DELETE FROM "messages"');
-		await dbConnection.end();
 	});
 
 	it("should schedule a message and return the correct data", async () => {
